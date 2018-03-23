@@ -18,7 +18,6 @@ from sklearn.preprocessing import LabelBinarizer, MultiLabelBinarizer
 import numpy as np
 from keras.optimizers import Adam
 import json
-from keras.callbacks import EarlyStopping
 from keras.models import save_model
 from keras.wrappers.scikit_learn import KerasClassifier
 from keras.layers import Dense, Input, Flatten, Dropout, Merge
@@ -45,16 +44,8 @@ if __name__ == "__main__":
 
     np.random.seed(settings.RANDOM_SEED)
 
-    # Keras callbacks
-    early_stop = EarlyStopping(
-        monitor='loss', # early stopping on accuracy (maybe bad idea), generous patience of 5
-        min_delta=0,
-        patience=2,
-        verbose=0,
-        mode='auto')
-
     # global EMB_INPUT_DIM, EMBEDDINGS_MATRIX, MAX_SEQUENCE_LENGTH, OUTPUT_UNITS
-    logging.info("Start crossvalidation and test with output dir {}".format(settings.OPT_DIRP))
+    logging.info("Start crossvalidation binary task and test with output dir {}".format(settings.OPT_DIRP))
     # Load data
     instances, labels = datahandler.load_corpus(settings.DATA_DIR)
 
@@ -66,8 +57,8 @@ if __name__ == "__main__":
     # Encode labels
     labels_orig = np.array(labels, dtype=object)
     labels = [l if l != -1 else [] for l in labels] # TODO test with negative label instances as a label in learning
-    labelenc = MultiLabelBinarizer() # makes multihot label encodings
-    y = labelenc.fit_transform(labels)
+    label_encoder = MultiLabelBinarizer() # makes multihot label encodings
+    y = label_encoder.fit_transform(labels)
 
     # Make sequence data from text
     # # Load predetermined holdout split
@@ -95,7 +86,7 @@ if __name__ == "__main__":
 
     # set global vars
     settings.EMB_INPUT_DIM = len(word_index) + 1
-    settings.OUTPUT_UNITS = len(labelenc.classes_)
+    settings.OUTPUT_UNITS = len(label_encoder.classes_)
     settings.WORD_INDEX = word_index
 
     # SKLEARN WRAPPER
@@ -115,32 +106,6 @@ if __name__ == "__main__":
         "epochs": [32, 64],
     }
 
-    # param_grid = { # for fast test run
-    #     "wvec": [10, 20],
-    #     "bidirectional": [True],
-    #     "lstm_units": [int(settings.MAX_SEQUENCE_LENGTH * 4)],
-    #     "lstm_dropout": [0.0],
-    #     "lstm_recurrent_dropout": [0.0],
-    #     "optimizer": [
-    #         (Adam, {"lr":0.001, "beta_1":0.9, "beta_2":0.999, "epsilon":1e-08, "decay":0.0}), # we do not init any objects in params so that they are visible as dict to the CV.get_params().
-    #         # (Adam, {"lr":0.002, "beta_1":0.9, "beta_2":0.999, "epsilon":1e-08, "decay":1.0}), # this does not seem to do better, ever
-    #     ],
-    #     "batch_size": [64],
-    #     "epochs": [6],
-    # }
-    # param_grid = { # testing with best stanford random search settings
-    #     "bidirectional": [True,],
-    #     "lstm_units": [int(settings.MAX_SEQUENCE_LENGTH * 8)],
-    #     "lstm_dropout": [0.0],
-    #     "lstm_recurrent_dropout": [0.0],
-    #     "optimizer": [
-    #         (Adam, {"lr":0.001, "beta_1":0.9, "beta_2":0.999, "epsilon":1e-08, "decay":0.0}), # we do not init any objects in params so that they are visible as dict to the CV.get_params().
-    #         # (Adam, {"lr":0.002, "beta_1":0.9, "beta_2":0.999, "epsilon":1e-08, "decay":1.0}), # this does not seem to do better, ever
-    #     ],
-    #     "batch_size": [64],
-    #     "epochs": [32],
-    # }
-
     # searchcv = classifier.KerasRandomizedSearchCV(
     searchcv = RandomizedSearchCV(
         multilab_lstm,
@@ -148,7 +113,7 @@ if __name__ == "__main__":
         n_iter=32,
         cv=settings.KFOLD,
         scoring=scorer.my_scorer,
-        fit_params=dict(callbacks=[early_stop, ]), # hack for adding keras callbacks
+        fit_params=dict(callbacks=[settings.EARLY_STOP, ]), # hack for adding keras callbacks
         verbose=0,
         error_score=0, # value 0 ignores failed fits and move on to next fold
         return_train_score=False, # circumvents bug in sklearn, prevent return the meaningless train score which will always be near perfect
@@ -184,40 +149,49 @@ if __name__ == "__main__":
     #     verbose=2,
     #            )
 
-    searchcv.fit(x_in, y_in, verbose=2)
+    # MULTILABEL TO BINARY TASKS:
+    for bin_label in np.unique(labels_in):
+        logging.info(f"Binary task {bin_label}: running cv optimization.")
 
-    try:
-        best_params = searchcv.best_params_
-    except TypeError as e:
-        logging.info(e)
-        best_params = searchcv.best_estimator_.sk_params
+        # transform output label
+        pos_label = label_encoder.transform(bin_label)
+        y_in = (y_in == pos_label).astype(int)
+        y_out = (y_in == pos_label).astype(int)
 
-    logging.info("CV BEST ESTIMATOR: {}".format(searchcv.best_estimator_))
-    logging.info("CV BEST PARAMETERS: {}".format(best_params))
-    logging.info("CV BEST SCORE: {}".format(searchcv.best_score_))
+        searchcv.fit(x_in, y_in, verbose=2)
 
-    # try:
-    #     os.makedirs(settings.OPT_DIRP, exist_ok=True)
-    #     cv_fp = os.path.join(settings.OPT_DIRP, "cv_param_search.joblibpickle")
-    #     joblib.dump(searchcv, cv_fp)
-    # except Exception as e:
-    #     logging.exception("Failed to pickle search object. ", e) # write code to do this not supported by default
+        try:
+            best_params = searchcv.best_params_
+        except TypeError as e:
+            logging.info(e)
+            best_params = searchcv.best_estimator_.sk_params
 
-    y_pred = searchcv.predict(x_out)
+        logging.info("CV BEST ESTIMATOR: {}".format(searchcv.best_estimator_))
+        logging.info("CV BEST PARAMETERS: {}".format(best_params))
+        logging.info("CV BEST SCORE: {}".format(searchcv.best_score_))
 
-    y_pred[y_pred >= 0.5] = 1
-    y_pred[y_pred < 0.5] = 0
+        # try:
+        #     os.makedirs(settings.OPT_DIRP, exist_ok=True)
+        #     cv_fp = os.path.join(settings.OPT_DIRP, "cv_param_search.joblibpickle")
+        #     joblib.dump(searchcv, cv_fp)
+        # except Exception as e:
+        #     logging.exception("Failed to pickle search object. ", e) # write code to do this not supported by default
 
-    # multilabel_pred = np.unique(np.count_nonzero(y_pred, axis=1), return_counts=True) # code to check whether multilabel multihots are in deed predicted
-    # logging.info(multilabel_pred)
+        y_pred = searchcv.predict(x_out)
 
-    clf_report = classification_report(y_out, y_pred, target_names=labelenc.classes_) # TODO the avg/total does not take into account labels
+        y_pred[y_pred >= 0.5] = 1
+        y_pred[y_pred < 0.5] = 0
 
-    try:
-        os.makedirs(settings.OPT_DIRP, exist_ok=True)
-        with open(os.path.join(settings.OPT_DIRP, "holdout_report.txt"), "wt") as report_out:
-            report_out.write(clf_report)
-    except Exception as e:
-        logging.exception("Failed to write classification report.", e)
+        # multilabel_pred = np.unique(np.count_nonzero(y_pred, axis=1), return_counts=True) # code to check whether multilabel multihots are in deed predicted
+        # logging.info(multilabel_pred)
 
-    logging.info(clf_report)
+        clf_report = classification_report(y_out, y_pred, target_names=label_encoder.classes_) # TODO the avg/total does not take into account labels
+
+        try:
+            os.makedirs(settings.OPT_DIRP, exist_ok=True)
+            with open(os.path.join(settings.OPT_DIRP, "holdout_report.txt"), "wt") as report_out:
+                report_out.write(clf_report)
+        except Exception as e:
+            logging.exception("Failed to write classification report.", e)
+
+        logging.info(clf_report)

@@ -9,7 +9,6 @@ Module for loading and writing of experiment data.
 '''
 from glob import glob
 import os
-from sentifmdetect import scorer
 from sentifmdetect import settings
 from sklearn.model_selection import train_test_split
 from sentifmdetect import util
@@ -196,6 +195,7 @@ def foldlogs_to_dataframe(fl,
                           groupby_key=lambda x: (x["clf_type"], x["clf_params"])):
     # unify the list of folds in the {'column': 'index'}
     # group the folds with the same classifier-parameters
+    from sentifmdetect import scorer
 
     def move_results_up(d):
         new_d = {}

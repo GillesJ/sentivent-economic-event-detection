@@ -8,6 +8,8 @@ Copyright (c) Gilles Jacobs. All rights reserved.
 from sentifmdetect import settings
 from sentifmdetect import datahandler
 import os
+os.environ['CORENLP_HOME'] = "/home/gilles/software/stanford-corenlp-full-2018-02-27/"
+import string
 import logging
 from sentifmdetect import util
 import keras.preprocessing.text
@@ -18,6 +20,11 @@ from nltk.tokenize.stanford import CoreNLPTokenizer
 from nltk import word_tokenize
 import nltk
 from glove import Glove
+import sys
+if sys.version_info < (3,):
+    maketrans = string.maketrans
+else:
+    maketrans = str.maketrans
 
 util.setup_logging()
 nltk.download('punkt')
@@ -134,6 +141,24 @@ def make_sequences(instances):
 
     data = pad_sequences(sequences, maxlen=MAX_SEQUENCE_LENGTH)
     return data, word_index, MAX_SEQUENCE_LENGTH
+
+def corenlp_tokenize_enpbt(
+        text,
+        filters="!\"#$%&()*+,-./:;<=>?@[\\]^_`{|}~\t\n",
+        lower=True,
+        split=" "):
+
+    if lower:
+        text = text.lower()
+
+    if sys.version_info < (3,) and isinstance(text, unicode):
+        translate_map = dict((ord(c), unicode(split)) for c in filters)
+    else:
+        translate_map = maketrans(filters, split * len(filters))
+    text = text.translate(translate_map)
+
+    ann = settings.CORENLP_CLIENT.annotate(text)
+    return [x.word for x in ann.sentencelessToken]
 
 def make_embedding_matrix(word_index, embeddings_index):
 

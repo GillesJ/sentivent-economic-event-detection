@@ -11,14 +11,19 @@ import numpy as np
 import socket
 import multiprocessing
 import keras
+from keras.callbacks import EarlyStopping
 import math
 from sentifmdetect.classifier import GlobalMetrics
-from sentifmdetect.featurize import text_to_word_sequence_nltkword, text_to_word_sequence_stanford
+from sentifmdetect.featurize import text_to_word_sequence_nltkword, text_to_word_sequence_stanford, corenlp_tokenize_enpbt
 from sklearn.metrics import f1_score, precision_score, recall_score, roc_auc_score
 from glob import glob
 import os
 from datetime import datetime
+from pytz import timezone
+import corenlp
 
+#TESTING enable to limit the amount of trained and tested instances for a test run
+TEST = True
 # RANDOM SEED
 RANDOM_SEED = 92 # set this in the experiment code with np.random.seed(), CAVEAT: np.random.seed is not thread-safe:
 # sklearn multithreaded objects have a random_state argument to which you have to pass the seed.
@@ -40,11 +45,12 @@ EXCLUDE = ALL_EXCLUDE[DATASET]
 DATA_DIR = ALL_DATA_DIR[DATASET]
 
 # METADATA
-TIMESTAMP = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+TIMESTAMP = datetime.now(timezone("Europe/Brussels")).strftime("%Y-%m-%d_%H:%M:%S_%Z")
 HOST = socket.gethostname()
 
 # OUTPUT
-OPT_DIRP = f"/home/gilles/repos/sentifmdetect17/output/{DATASET}_{TIMESTAMP}" # TODO REMEMBER THIS WAS RELATIVE PATH AND DIFFERS WHEN CALLED IN MODULE DO NOT DELETE ANY OUTPUT DIR
+optdir = f"/home/gilles/repos/sentifmdetect17/output/{DATASET}_{TIMESTAMP}"
+OPT_DIRP = optdir if not TEST else optdir.replace(DATASET, f"TEST_{DATASET}")
 SCORER_FOLD_LOG_DIRP = os.path.join(OPT_DIRP, 'fold_log')
 SCORER_FOLD_MODEL_DIRP = None
 # SCORER_FOLD_MODEL_DIRP = os.path.join(OPT_DIRP, 'fold_models')
@@ -62,6 +68,15 @@ KERAS_METRICS = GlobalMetrics([(f1_score, {}),
                         (recall_score, {}),
                         (roc_auc_score, {})],
                         from_categorical=True)
+
+# Keras callbacks
+EARLY_STOP = EarlyStopping(
+    monitor='loss',  # early stopping on accuracy (maybe bad idea), generous patience of 5
+    min_delta=0,
+    patience=2,
+    verbose=0,
+    mode='auto')
+
 # FEATURIZE
 # EMB_DIM = 200
 # # for sentifm trained NAACL paper
@@ -81,34 +96,46 @@ EMB_FP = {
     "glove.twitter.27B.100d": "/home/gilles/corpora/word_embeddings/glove_stanford/glove.twitter.27B/glove.twitter.27B.100d.txt",
     "glove.twitter.27B.200d": "/home/gilles/corpora/word_embeddings/glove_stanford/glove.twitter.27B/glove.twitter.27B.200d.txt",
 	"glove.en_maintype_w15_lr0.25_ep20.50d.glovemodel": # own trained model top 10 best on google word2vec analogy eval (cf. /static)
-		"/home/gilles/repos/sentifmdetect17/sentifmdetect/output/en_maintype_2017-12-18_16-18-44_WORDVECTORS/glove.en_maintype_w15_lr0.25_ep20.50d.glovemodel",
+		"/home/gilles/repos/sentifmdetect17/sentifmdetect/output/en_maintype_2018-03-22_18:41:52_CET_WORDVECTORS/glove.en_maintype_w15_lr0.25_ep20.50d.glovemodel",
 	"glove.en_maintype_w15_lr0.25_ep30.100d.glovemodel":
-		"/home/gilles/repos/sentifmdetect17/sentifmdetect/output/en_maintype_2017-12-18_16-18-44_WORDVECTORS/glove.en_maintype_w15_lr0.25_ep30.100d.glovemodel",
+		"/home/gilles/repos/sentifmdetect17/sentifmdetect/output/en_maintype_2018-03-22_18:41:52_CET_WORDVECTORS/glove.en_maintype_w15_lr0.25_ep30.100d.glovemodel",
 	"glove.en_maintype_w10_lr0.25_ep20.100d.glovemodel":
-		"/home/gilles/repos/sentifmdetect17/sentifmdetect/output/en_maintype_2017-12-18_16-18-44_WORDVECTORS/glove.en_maintype_w10_lr0.25_ep20.100d.glovemodel",
+		"/home/gilles/repos/sentifmdetect17/sentifmdetect/output/en_maintype_2018-03-22_18:41:52_CET_WORDVECTORS/glove.en_maintype_w10_lr0.25_ep20.100d.glovemodel",
 	"glove.en_maintype_w15_lr0.25_ep50.50d.glovemodel":
-		"/home/gilles/repos/sentifmdetect17/sentifmdetect/output/en_maintype_2017-12-18_16-18-44_WORDVECTORS/glove.en_maintype_w15_lr0.25_ep50.50d.glovemodel",
+		"/home/gilles/repos/sentifmdetect17/sentifmdetect/output/en_maintype_2018-03-22_18:41:52_CET_WORDVECTORS/glove.en_maintype_w15_lr0.25_ep50.50d.glovemodel",
 	"glove.en_maintype_w15_lr0.25_ep20.25d.glovemodel":
-		"/home/gilles/repos/sentifmdetect17/sentifmdetect/output/en_maintype_2017-12-18_16-18-44_WORDVECTORS/glove.en_maintype_w15_lr0.25_ep20.25d.glovemodel",
+		"/home/gilles/repos/sentifmdetect17/sentifmdetect/output/en_maintype_2018-03-22_18:41:52_CET_WORDVECTORS/glove.en_maintype_w15_lr0.25_ep20.25d.glovemodel",
 	"glove.en_maintype_w10_lr0.25_ep20.50d.glovemodel":
-		"/home/gilles/repos/sentifmdetect17/sentifmdetect/output/en_maintype_2017-12-18_16-18-44_WORDVECTORS/glove.en_maintype_w10_lr0.25_ep20.50d.glovemodel",
+		"/home/gilles/repos/sentifmdetect17/sentifmdetect/output/en_maintype_2018-03-22_18:41:52_CET_WORDVECTORS/glove.en_maintype_w10_lr0.25_ep20.50d.glovemodel",
 	"glove.en_maintype_w15_lr0.25_ep20.200d.glovemodel":
-		"/home/gilles/repos/sentifmdetect17/sentifmdetect/output/en_maintype_2017-12-18_16-18-44_WORDVECTORS/glove.en_maintype_w15_lr0.25_ep20.200d.glovemodel",
+		"/home/gilles/repos/sentifmdetect17/sentifmdetect/output/en_maintype_2018-03-22_18:41:52_CET_WORDVECTORS/glove.en_maintype_w15_lr0.25_ep20.200d.glovemodel",
 	"glove.en_maintype_w15_lr0.25_ep30.25d.glovemodel": # seem to do well
-		"/home/gilles/repos/sentifmdetect17/sentifmdetect/output/en_maintype_2017-12-18_16-18-44_WORDVECTORS/glove.en_maintype_w15_lr0.25_ep30.25d.glovemodel",
+		"/home/gilles/repos/sentifmdetect17/sentifmdetect/output/en_maintype_2018-03-22_18:41:52_CET_WORDVECTORS/glove.en_maintype_w15_lr0.25_ep30.25d.glovemodel",
 	"glove.en_maintype_w10_lr0.25_ep30.100d.glovemodel":
-		"/home/gilles/repos/sentifmdetect17/sentifmdetect/output/en_maintype_2017-12-18_16-18-44_WORDVECTORS/glove.en_maintype_w10_lr0.25_ep30.100d.glovemodel",
+		"/home/gilles/repos/sentifmdetect17/sentifmdetect/output/en_maintype_2018-03-22_18:41:52_CET_WORDVECTORS/glove.en_maintype_w10_lr0.25_ep30.100d.glovemodel",
 	"glove.en_maintype_w10_lr0.25_ep30.25d.glovemodel":
-		"/home/gilles/repos/sentifmdetect17/sentifmdetect/output/en_maintype_2017-12-18_16-18-44_WORDVECTORS/glove.en_maintype_w10_lr0.25_ep30.25d.glovemodel",
+		"/home/gilles/repos/sentifmdetect17/sentifmdetect/output/en_maintype_2018-03-22_18:41:52_CET_WORDVECTORS/glove.en_maintype_w10_lr0.25_ep30.25d.glovemodel",
 }
 # for settings the tokenization function
 TOKENIZERS = {
-    "en": keras.preprocessing.text.text_to_word_sequence, # default tokenize func of keras.Tokenizer: glove.6B coverage 89.78% BEST
+    "en": corenlp_tokenize_enpbt
+    # "en": keras.preprocessing.text.text_to_word_sequence, # default tokenize func of keras.Tokenizer: glove.6B coverage 89.78% BEST
     # "en": text_to_word_sequence_nltkword, # TODO setup CORENNLP because is used for glove.6B
     # "en": text_to_word_sequence_stanford, # nltk tokenizer, 82.09% coverage of glove.6B stanford emb
 }
 TOKENIZE_FUNC = TOKENIZERS[LANGUAGE]# func to monkeypatch the keras tokenizer that matches the pretrained embeddings
+if TOKENIZE_FUNC in [corenlp_tokenize_enpbt]:
+    CORENLP_CLIENT = corenlp.CoreNLPClient(annotators=["tokenize"])
 
+# small param grid used when code testing
+PARAM_GRID_TEST = {
+    "wvec": [EMB_FP["glove.en_maintype_w15_lr0.25_ep20.50d.glovemodel"]], # for testing self vectors + init with first of pretrained
+    # "wvec": [EMB_FP["glove.6B.50d"]],
+    "bidirectional": [False],
+    "lstm_units": [64],
+    "batch_size": [32],
+    "epochs": [8],
+}
 # GLOVE SETTINGS
 WVEC_OPT_DIRP = OPT_DIRP + "_WORDVECTORS"
 TESTSIM_WORDS = ["company", "profit", "merger", "rise", "price", "london", "dividend", "margin", "recover", "debt", "ipo"]
@@ -121,3 +148,9 @@ GLOVE_PARAMS = {
     "dims": [25, 50, 100, 200, 300, 400, 500, 600], # no
 }
 
+# METADATA init
+METADATA = {
+    "random_seed": ,
+    "host": ,
+    "opt_dir": ,
+}

@@ -8,10 +8,12 @@ Copyright (c) Gilles Jacobs. All rights reserved.
 import os
 import logging.config
 import yaml
+from sentifmdetect import settings
 import collections
 from itertools import groupby, chain
 import glob
-
+import jsonpickle.ext.numpy as jsonpickle_numpy
+jsonpickle_numpy.register_handlers() #json pickle can now be used with numpy
 
 def setup_logging(
         default_path='logging.yaml',
@@ -31,6 +33,19 @@ def setup_logging(
         logging.config.dictConfig(config)
     else:
         logging.basicConfig(level=default_level)
+
+
+def write_metadata(metadata):
+    """
+    Writes the metadata produced by an experiment to the set optdir.
+    Will update the file for same.
+    :param metadata: a dict with the metadata.
+    """
+    fp = os.path.join(settings.OPT_DIRP, f"{settings.TIMESTAMP}_metadata.json")
+    metadata_enc = jsonpickle_numpy.encode(metadata)
+    with open(fp, "wt") as meta_out:
+        json.dump(metadata_enc, meta_out)
+    logging.info(f"Wrote metadata to {fp}.")
 
 def flatten(l):
     for el in l:
