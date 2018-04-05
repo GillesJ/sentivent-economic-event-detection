@@ -69,7 +69,7 @@ MergerAcquisition       0.32      0.24      0.27        25
       avg / total       0.79      0.62      0.68       239
 ```
 
-## No pretrained
+## No pretrained IN PAPER
 - CV BEST ESTIMATOR: <sentifmdetect.classifier.KerasClassifierCustom object at 0x7fafd41287f0>
 
   CV BEST PARAMETERS: {'wvec': 200, 'optimizer': (<class 'keras.optimizers.Adam'>, {'lr': 0.001, 'beta_1': 0.9, 'beta_2': 0.999, 'epsilon': 1e-08, 'decay': 0.0}), 'lstm_units': 268, 'lstm_recurrent_dropout': 0.2, 'lstm_dropout': 0

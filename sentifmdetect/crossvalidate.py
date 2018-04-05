@@ -8,7 +8,7 @@ Copyright (c) Gilles Jacobs. All rights reserved.
 from sentifmdetect import datahandler
 from sentifmdetect import settings
 from sentifmdetect import scorer
-from sentifmdetect import featurize
+from sentifmdetect import featurizer
 from sentifmdetect import util
 from sentifmdetect import classifier
 import os
@@ -80,7 +80,7 @@ if __name__ == "__main__":
     if settings.TEST:
         idc_in, idc_out = idc_in[:40], idc_out[:10]
 
-    x, word_index, settings.MAX_SEQUENCE_LENGTH = featurize.make_sequences(instances)
+    x, word_index, settings.MAX_SEQUENCE_LENGTH = featurizer.make_sequences(instances)
 
     x_in = x[idc_in]
     x_out = x[idc_out]

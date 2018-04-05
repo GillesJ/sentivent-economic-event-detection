@@ -23,7 +23,7 @@ import json
 import logging
 from fuzzywuzzy import process, fuzz
 
-util.setup_logging()
+# util.setup_logging()
 pandas.set_option('display.max_colwidth', -1)
 
 def inspect_similar(instances, threshold=90):

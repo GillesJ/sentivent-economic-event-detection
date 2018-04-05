@@ -12,6 +12,8 @@ from sentifmdetect import settings
 import collections
 from itertools import groupby, chain
 import glob
+import json
+import jsonpickle
 import jsonpickle.ext.numpy as jsonpickle_numpy
 jsonpickle_numpy.register_handlers() #json pickle can now be used with numpy
 
@@ -34,18 +36,85 @@ def setup_logging(
     else:
         logging.basicConfig(level=default_level)
 
+def read_json(fp):
+    with open(fp, "rt") as f_in:
+        data_enc = json.load(f_in)
+    print(f"Read file {fp}.")
+    data = jsonpickle.decode(data_enc)
+    return data
 
-def write_metadata(metadata):
+def write_json(data, fp):
+    data_enc = jsonpickle.encode(data)
+    with open(fp, "wt") as f_out:
+        json.dump(data_enc, f_out)
+    print(f"Wrote file {fp}.")
+    return True
+
+def read_features():
+
+    # check if premade feature file is present
+    try:
+        with open(settings.FEATURE_OPT_FP, "rt") as feature_in:
+            feature_data_enc = json.load(feature_in)
+        feature_data = jsonpickle.decode(feature_data_enc)
+        return feature_data
+
+    except Exception as e:
+        logging.info(f"Could not load json features. {str(e)}")
+        return False
+
+def write_features(feature_data):
     """
-    Writes the metadata produced by an experiment to the set optdir.
-    Will update the file for same.
+    Encodes and write feature data.
+    :param feature_data:
+    """
+    # encode numpy to json
+    feature_data_enc = jsonpickle.encode(feature_data)
+
+    with open(settings.FEATURE_OPT_FP, "wt") as feature_out:
+        json.dump(feature_data_enc, feature_out)
+
+    # test by reading
+    with open(settings.FEATURE_OPT_FP, "rt") as feature_in:
+        feature_data_enc = json.load(feature_in)
+    feature_data_reloaded = jsonpickle.decode(feature_data_enc)
+
+    logging.info(f"Wrote feature data to {settings.FEATURE_OPT_FP}.")
+
+def nested_update(d, u):
+    """
+    Nested dict update
+    :param d: dict to update
+    :param u: update
+    :return: updated dict
+    """
+    for k, v in u.items():
+        if isinstance(v, collections.Mapping):
+            d[k] = nested_update(d.get(k, {}), v)
+        else:
+            d[k] = v
+    return d
+
+def read_metadata(fp):
+    with open(fp, "rt") as meta_in:
+        metadata_enc = json.load(meta_in)
+    metadata = jsonpickle.decode(metadata_enc)
+    logging.info(f"Read exp data at {fp}")
+    return metadata
+
+def write_metadata(update_data):
+    """
+    Updates the experiment metadata with a dict.
+    Then writes the metadata produced by an experiment to the set optdir.
     :param metadata: a dict with the metadata.
     """
-    fp = os.path.join(settings.OPT_DIRP, f"{settings.TIMESTAMP}_metadata.json")
-    metadata_enc = jsonpickle_numpy.encode(metadata)
+    settings.METADATA = nested_update(settings.METADATA, update_data)
+    fp = os.path.join(settings.OPT_DIRP, "metadata.json")
+    # encode numpy to json
+    metadata_enc = jsonpickle.encode(settings.METADATA)
     with open(fp, "wt") as meta_out:
         json.dump(metadata_enc, meta_out)
-    logging.info(f"Wrote metadata to {fp}.")
+    logging.info(f"Wrote experiment metadata to {fp}.")
 
 def flatten(l):
     for el in l:

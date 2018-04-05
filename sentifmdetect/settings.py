@@ -13,8 +13,9 @@ import multiprocessing
 import keras
 from keras.callbacks import EarlyStopping
 import math
+from sklearn.model_selection import StratifiedKFold
 from sentifmdetect.classifier import GlobalMetrics
-from sentifmdetect.featurize import text_to_word_sequence_nltkword, text_to_word_sequence_stanford, corenlp_tokenize_enpbt
+from sentifmdetect.featurizer import text_to_word_sequence_nltkword, text_to_word_sequence_stanford, corenlp_tokenize_enpbt
 from sklearn.metrics import f1_score, precision_score, recall_score, roc_auc_score
 from glob import glob
 import os
@@ -23,7 +24,8 @@ from pytz import timezone
 import corenlp
 
 #TESTING enable to limit the amount of trained and tested instances for a test run
-TEST = True
+TEST = False
+N_TEST_INSTANCES = 200
 # RANDOM SEED
 RANDOM_SEED = 92 # set this in the experiment code with np.random.seed(), CAVEAT: np.random.seed is not thread-safe:
 # sklearn multithreaded objects have a random_state argument to which you have to pass the seed.
@@ -31,26 +33,25 @@ np.random.seed(RANDOM_SEED)
 
 # DATA FILES
 LANGUAGE = "en"
-DATASET = "{}_maintype".format(LANGUAGE)
+TASK = "maintype"
+DATASET = f"{LANGUAGE}_{TASK}" if not TEST else f"TEST{N_TEST_INSTANCES}_{LANGUAGE}_{TASK}"
 EXPERIMENT_DATA = "/home/gilles/repos/sentifmdetect17/sentifmdetect/static/experiment_data.json" # made for sharing
 ALL_DATA_DIR = {
     "en_maintype": "/home/gilles/corpora/sentifm/data/English/MainType",
     "nl_maintype": "/home/gilles/corpora/sentifm/data/Dutch/MainType",
 }
-ALL_EXCLUDE = {
+ALL_EXCLUDE = { # data path to skip for inclusion because it redundant and badly parsed
     "en_maintype": [],
     "nl_maintype": ["/home/gilles/corpora/sentifm/data/Dutch/MainType/BuyRating_nl_train_uniq.txt"],
 }
-EXCLUDE = ALL_EXCLUDE[DATASET]
-DATA_DIR = ALL_DATA_DIR[DATASET]
-
-# METADATA
-TIMESTAMP = datetime.now(timezone("Europe/Brussels")).strftime("%Y-%m-%d_%H:%M:%S_%Z")
-HOST = socket.gethostname()
+EXCLUDE = ALL_EXCLUDE[f"{LANGUAGE}_{TASK}"]
+DATA_DIR = ALL_DATA_DIR[f"{LANGUAGE}_{TASK}"]
+FEATURE_OPT_FP = f"/home/gilles/repos/sentifmdetect17/features/{DATASET}_features.json"
 
 # OUTPUT
-optdir = f"/home/gilles/repos/sentifmdetect17/output/{DATASET}_{TIMESTAMP}"
-OPT_DIRP = optdir if not TEST else optdir.replace(DATASET, f"TEST_{DATASET}")
+TIMESTAMP = datetime.now(timezone("Europe/Brussels")).strftime("%Y-%m-%d_%H:%M:%S_%Z")
+OPT_DIRP = f"/home/gilles/repos/sentifmdetect17/output/{DATASET}_{TIMESTAMP}"
+os.makedirs(OPT_DIRP, exist_ok=True)
 SCORER_FOLD_LOG_DIRP = os.path.join(OPT_DIRP, 'fold_log')
 SCORER_FOLD_MODEL_DIRP = None
 # SCORER_FOLD_MODEL_DIRP = os.path.join(OPT_DIRP, 'fold_models')
@@ -61,9 +62,9 @@ SCORE_AVERAGING = 'macro'
 # EXPERIMENT SETTINGS
 HOLDOUT_SPLIT = 0.1
 CV_SPLIT = 0.1
-KFOLD = 3
+KFOLD = StratifiedKFold(n_splits=3, random_state=np.random.seed(RANDOM_SEED))
 
-KERAS_METRICS = GlobalMetrics([(f1_score, {}),
+VAL_METRICS = GlobalMetrics([(f1_score, {}),
                         (precision_score, {}),
                         (recall_score, {}),
                         (roc_auc_score, {})],
@@ -71,9 +72,9 @@ KERAS_METRICS = GlobalMetrics([(f1_score, {}),
 
 # Keras callbacks
 EARLY_STOP = EarlyStopping(
-    monitor='loss',  # early stopping on accuracy (maybe bad idea), generous patience of 5
+    monitor='val_acc',  # early stopping on accuracy (maybe bad idea), generous patience of 5
     min_delta=0,
-    patience=2,
+    patience=5,
     verbose=0,
     mode='auto')
 
@@ -87,34 +88,34 @@ EARLY_STOP = EarlyStopping(
 EMB_FP = {
     "glove.6B.50d": "/home/gilles/corpora/word_embeddings/glove_stanford/glove.6B/glove.6B.50d.txt",
     "glove.6B.100d": "/home/gilles/corpora/word_embeddings/glove_stanford/glove.6B/glove.6B.100d.txt",
-    # "glove.6B.200d": "/home/gilles/corpora/word_embeddings/glove_stanford/glove.6B/glove.6B.200d.txt",
-    # "glove.6B.300d": "/home/gilles/corpora/word_embeddings/glove_stanford/glove.6B/glove.6B.300d.txt",
-    # "glove.42B.300d": "/home/gilles/corpora/word_embeddings/glove_stanford/glove.42B.300d/glove.42B.300d.txt",
-    # "glove.840B.300d": "/home/gilles/corpora/word_embeddings/glove_stanford/glove.840B.300d/glove.840B.300d.txt",
+    "glove.6B.200d": "/home/gilles/corpora/word_embeddings/glove_stanford/glove.6B/glove.6B.200d.txt",
+    "glove.6B.300d": "/home/gilles/corpora/word_embeddings/glove_stanford/glove.6B/glove.6B.300d.txt",
+    "glove.42B.300d": "/home/gilles/corpora/word_embeddings/glove_stanford/glove.42B.300d/glove.42B.300d.txt",
+    "glove.840B.300d": "/home/gilles/corpora/word_embeddings/glove_stanford/glove.840B.300d/glove.840B.300d.txt",
     "glove.twitter.27B.25d": "/home/gilles/corpora/word_embeddings/glove_stanford/glove.twitter.27B/glove.twitter.27B.25d.txt",
     "glove.twitter.27B.50d": "/home/gilles/corpora/word_embeddings/glove_stanford/glove.twitter.27B/glove.twitter.27B.50d.txt",
     "glove.twitter.27B.100d": "/home/gilles/corpora/word_embeddings/glove_stanford/glove.twitter.27B/glove.twitter.27B.100d.txt",
     "glove.twitter.27B.200d": "/home/gilles/corpora/word_embeddings/glove_stanford/glove.twitter.27B/glove.twitter.27B.200d.txt",
 	"glove.en_maintype_w15_lr0.25_ep20.50d.glovemodel": # own trained model top 10 best on google word2vec analogy eval (cf. /static)
-		"/home/gilles/repos/sentifmdetect17/sentifmdetect/output/en_maintype_2018-03-22_18:41:52_CET_WORDVECTORS/glove.en_maintype_w15_lr0.25_ep20.50d.glovemodel",
+		"/home/gilles/repos/sentifmdetect17/output/en_maintype_2018-03-22_18:41:52_CET_WORDVECTORS/glove.en_maintype_w15_lr0.25_ep20.50d.glovemodel",
 	"glove.en_maintype_w15_lr0.25_ep30.100d.glovemodel":
-		"/home/gilles/repos/sentifmdetect17/sentifmdetect/output/en_maintype_2018-03-22_18:41:52_CET_WORDVECTORS/glove.en_maintype_w15_lr0.25_ep30.100d.glovemodel",
+		"/home/gilles/repos/sentifmdetect17/output/en_maintype_2018-03-22_18:41:52_CET_WORDVECTORS/glove.en_maintype_w15_lr0.25_ep30.100d.glovemodel",
 	"glove.en_maintype_w10_lr0.25_ep20.100d.glovemodel":
-		"/home/gilles/repos/sentifmdetect17/sentifmdetect/output/en_maintype_2018-03-22_18:41:52_CET_WORDVECTORS/glove.en_maintype_w10_lr0.25_ep20.100d.glovemodel",
+		"/home/gilles/repos/sentifmdetect17/output/en_maintype_2018-03-22_18:41:52_CET_WORDVECTORS/glove.en_maintype_w10_lr0.25_ep20.100d.glovemodel",
 	"glove.en_maintype_w15_lr0.25_ep50.50d.glovemodel":
-		"/home/gilles/repos/sentifmdetect17/sentifmdetect/output/en_maintype_2018-03-22_18:41:52_CET_WORDVECTORS/glove.en_maintype_w15_lr0.25_ep50.50d.glovemodel",
+		"/home/gilles/repos/sentifmdetect17/output/en_maintype_2018-03-22_18:41:52_CET_WORDVECTORS/glove.en_maintype_w15_lr0.25_ep50.50d.glovemodel",
 	"glove.en_maintype_w15_lr0.25_ep20.25d.glovemodel":
-		"/home/gilles/repos/sentifmdetect17/sentifmdetect/output/en_maintype_2018-03-22_18:41:52_CET_WORDVECTORS/glove.en_maintype_w15_lr0.25_ep20.25d.glovemodel",
+		"/home/gilles/repos/sentifmdetect17/output/en_maintype_2018-03-22_18:41:52_CET_WORDVECTORS/glove.en_maintype_w15_lr0.25_ep20.25d.glovemodel",
 	"glove.en_maintype_w10_lr0.25_ep20.50d.glovemodel":
-		"/home/gilles/repos/sentifmdetect17/sentifmdetect/output/en_maintype_2018-03-22_18:41:52_CET_WORDVECTORS/glove.en_maintype_w10_lr0.25_ep20.50d.glovemodel",
+		"/home/gilles/repos/sentifmdetect17/output/en_maintype_2018-03-22_18:41:52_CET_WORDVECTORS/glove.en_maintype_w10_lr0.25_ep20.50d.glovemodel",
 	"glove.en_maintype_w15_lr0.25_ep20.200d.glovemodel":
-		"/home/gilles/repos/sentifmdetect17/sentifmdetect/output/en_maintype_2018-03-22_18:41:52_CET_WORDVECTORS/glove.en_maintype_w15_lr0.25_ep20.200d.glovemodel",
+		"/home/gilles/repos/sentifmdetect17/output/en_maintype_2018-03-22_18:41:52_CET_WORDVECTORS/glove.en_maintype_w15_lr0.25_ep20.200d.glovemodel",
 	"glove.en_maintype_w15_lr0.25_ep30.25d.glovemodel": # seem to do well
-		"/home/gilles/repos/sentifmdetect17/sentifmdetect/output/en_maintype_2018-03-22_18:41:52_CET_WORDVECTORS/glove.en_maintype_w15_lr0.25_ep30.25d.glovemodel",
+		"/home/gilles/repos/sentifmdetect17/output/en_maintype_2018-03-22_18:41:52_CET_WORDVECTORS/glove.en_maintype_w15_lr0.25_ep30.25d.glovemodel",
 	"glove.en_maintype_w10_lr0.25_ep30.100d.glovemodel":
-		"/home/gilles/repos/sentifmdetect17/sentifmdetect/output/en_maintype_2018-03-22_18:41:52_CET_WORDVECTORS/glove.en_maintype_w10_lr0.25_ep30.100d.glovemodel",
+		"/home/gilles/repos/sentifmdetect17/output/en_maintype_2018-03-22_18:41:52_CET_WORDVECTORS/glove.en_maintype_w10_lr0.25_ep30.100d.glovemodel",
 	"glove.en_maintype_w10_lr0.25_ep30.25d.glovemodel":
-		"/home/gilles/repos/sentifmdetect17/sentifmdetect/output/en_maintype_2018-03-22_18:41:52_CET_WORDVECTORS/glove.en_maintype_w10_lr0.25_ep30.25d.glovemodel",
+		"/home/gilles/repos/sentifmdetect17/output/en_maintype_2018-03-22_18:41:52_CET_WORDVECTORS/glove.en_maintype_w10_lr0.25_ep30.25d.glovemodel",
 }
 # for settings the tokenization function
 TOKENIZERS = {
@@ -133,8 +134,8 @@ PARAM_GRID_TEST = {
     # "wvec": [EMB_FP["glove.6B.50d"]],
     "bidirectional": [False],
     "lstm_units": [64],
-    "batch_size": [32],
-    "epochs": [8],
+    "batch_size": [128],
+    "epochs": [32],
 }
 # GLOVE SETTINGS
 WVEC_OPT_DIRP = OPT_DIRP + "_WORDVECTORS"
@@ -150,7 +151,7 @@ GLOVE_PARAMS = {
 
 # METADATA init
 METADATA = {
-    "random_seed": ,
-    "host": ,
-    "opt_dir": ,
+    "random_seed": RANDOM_SEED,
+    "host": socket.gethostname(),
+    "timestamp": TIMESTAMP,
 }

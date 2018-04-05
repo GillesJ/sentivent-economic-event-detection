@@ -6,7 +6,8 @@ sentifmdetect17
 Copyright (c) Gilles Jacobs. All rights reserved.  
 '''
 from sentifmdetect import settings
-from sentifmdetect import featurize
+from sentifmdetect import featurizer
+from sentifmdetect import util
 import os
 import keras
 from keras.optimizers import Adam
@@ -19,6 +20,8 @@ from sklearn.model_selection import train_test_split, RandomizedSearchCV
 from sklearn.metrics import precision_recall_fscore_support, classification_report, f1_score, precision_score,\
     recall_score, roc_auc_score
 import numpy as np
+
+# util.setup_logging()
 
 def create_emb_lstm(
         wvec=50, # can be the filepath as string of a pretrained wordvector in settings.ALL_EMB_FP or an int for no pretrained specifying dimensionality
@@ -34,10 +37,10 @@ def create_emb_lstm(
 
     if os.path.isfile(wvec): # if wvec is a path, pretrained word vectors are available
         # Load pretrained embeddings
-        embeddings_index = featurize.load_emb(wvec)
-        featurize.compute_pretrained_coverage(settings.WORD_INDEX, embeddings_index) # for log
+        embeddings_index = featurizer.load_emb(wvec)
+        featurizer.compute_pretrained_coverage(settings.WORD_INDEX, embeddings_index) # for log
         # make emb matrix
-        EMBEDDINGS_MATRIX = featurize.make_embedding_matrix(settings.WORD_INDEX, embeddings_index)
+        EMBEDDINGS_MATRIX = featurizer.make_embedding_matrix(settings.WORD_INDEX, embeddings_index)
         EMB_DIM = EMBEDDINGS_MATRIX.shape[1]
         model.add(
             Embedding(settings.EMB_INPUT_DIM, EMB_DIM, weights=[EMBEDDINGS_MATRIX], input_length=settings.MAX_SEQUENCE_LENGTH))
@@ -115,13 +118,18 @@ class GlobalMetrics(keras.callbacks.Callback):
 
 class KerasRandomizedSearchCV(RandomizedSearchCV):
     '''
-    Provides SearchCV for use with Keras classifiers. Overrides the fit method in order to clear the session and free
+    Provides SearchCV for use with Keras classifiers. Overrides the predict method in order to clear the session and free
     GPU memory.
     '''
-    def fit(self, *args, **kwargs):
-        super(KerasRandomizedSearchCV, self).fit(*args, **kwargs)
+
+    # def fit(self, *args, **kwargs):
+    #     super(KerasRandomizedSearchCV, self).fit(*args, **kwargs)
+    #     return self
+
+    def predict(self, *args, **kwargs):
+        pred = super(KerasRandomizedSearchCV, self).predict(*args, **kwargs)
         backend.clear_session()
-        return self
+        return pred
 
 
 

@@ -33,7 +33,7 @@ def log_metrics_and_params(clf, results, fold_log_dir, y_true=[], y_pred=[], mod
     to_write['clf_type'] = str(clf_type)
     to_write['clf_params'] = str(clf_params)
     to_write['savepath_model'] = model_save_fp
-    to_write['n_folds'] = settings.KFOLD
+    to_write['n_folds'] = str(settings.KFOLD)
     # to_write['cv_object'] = str(settings.CV) # TODO write all relevant metadata to foldlog, maybe just write the settings to to foldlogdir
     # pprint(to_write)
     try:
@@ -69,7 +69,7 @@ def get_metrics(y_true=[], y_pred=[], average=settings.SCORE_AVERAGING):
         'precision': metrics.precision_score,
         'recall': metrics.recall_score,
         'accuracy': metrics.accuracy_score,
-        'auc' : metrics.roc_auc_score,
+        'roc_auc' : metrics.roc_auc_score,
     }
     results = {}
     for metric_name, metric_func in chosen_metrics.items():
@@ -103,14 +103,21 @@ def my_scorer(clf, X_val, y_true_val):
 
     log_name = extract_clf_name(clf)
     metric = settings.SCORER_METRIC
+    settings.CURR_FOLD += 1
 
     # do all the work and return some of the metrics
     y_pred_val = clf.predict(X_val)
 
-    y_pred_val[y_pred_val >= 0.5] = 1
-    y_pred_val[y_pred_val < 0.5] = 0
+    if settings.POS_LABEL: # flatten the preds when binary task (without this [[1][-1]]
+        y_pred_val = y_pred_val.flatten()
 
-    results = get_metrics(y_true=y_true_val, y_pred=y_pred_val)
+    y_pred_val[y_pred_val >= 0.5] = 1
+    y_pred_val[y_pred_val < 0.5] = -1 #todo check true label is -1 for multilabel too
+
+    if settings.POS_LABEL:
+        results = get_metrics(y_true=y_true_val.astype(int), y_pred=y_pred_val.astype(int), average="binary")
+    else:
+        get_metrics(y_true=y_true_val.astype(int), y_pred=y_pred_val.astype(int))
 
     try:
         clf_params = clf.get_params()
@@ -125,6 +132,16 @@ def my_scorer(clf, X_val, y_true_val):
         model_save_fp = save_model(clf, fold_model_dirp, log_name=log_name)
     else:
         model_save_fp = None
+
+    util.write_metadata({
+        "cv": {
+            f"{settings.POS_LABEL}_{settings.CURR_FOLD}": {
+                "y_pred": y_pred_val.astype(int).tolist(),
+                "y_true": y_true_val.astype(int).tolist(),
+                "scores": results,
+            }
+        }
+    })
 
     if settings.SCORER_FOLD_LOG_DIRP:
         os.makedirs(settings.SCORER_FOLD_LOG_DIRP, exist_ok=True)

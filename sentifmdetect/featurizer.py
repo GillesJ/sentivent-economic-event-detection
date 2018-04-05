@@ -1,15 +1,19 @@
 #!/usr/bin/env python3
 '''
-featurize.py
+featurizer.py
 sentifmdetect17 
 11/24/17
 Copyright (c) Gilles Jacobs. All rights reserved.
 '''
 from sentifmdetect import settings
 from sentifmdetect import datahandler
+from sentifmdetect import util
+import json
+from sklearn.preprocessing import MultiLabelBinarizer
 import os
 os.environ['CORENLP_HOME'] = "/home/gilles/software/stanford-corenlp-full-2018-02-27/"
 import string
+from sklearn.model_selection import train_test_split
 import logging
 from sentifmdetect import util
 import keras.preprocessing.text
@@ -26,7 +30,7 @@ if sys.version_info < (3,):
 else:
     maketrans = str.maketrans
 
-util.setup_logging()
+# util.setup_logging()
 nltk.download('punkt')
 
 def text_to_word_sequence_stanford(text,
@@ -177,6 +181,74 @@ def make_embedding_matrix(word_index, embeddings_index):
             embedding_matrix[i] = embedding_vector
 
     return embedding_matrix
+
+def featurize():
+    instances, labels = datahandler.load_corpus(settings.DATA_DIR)
+    # when code testing limit the instances
+    if settings.TEST:
+        instances, labels = instances[:settings.N_TEST_INSTANCES], labels[:settings.N_TEST_INSTANCES]
+
+    all_stats = datahandler.get_label_stats(labels)
+
+    print(sum([v for k, v in all_stats["multilabel_distr"].items() if "," in k]))
+    print(sum([v for k, v in all_stats["multilabel_count"].items() if "," in k]))
+
+    # Encode labels
+    labels_orig = np.array(labels, dtype=object)
+    labels = [l if l != -1 else [] for l in labels]  # TODO test with negative label instances as a label in learning
+    label_encoder = MultiLabelBinarizer()  # makes multihot label encodings
+    y = label_encoder.fit_transform(labels)
+
+    # Make sequence data from text
+    # # Load predetermined holdout split
+    with open(settings.EXPERIMENT_DATA, "rt") as exp_in_test:
+        experiment = json.load(exp_in_test)
+
+    # when code testing limit the instances by using the slicing done by predetermined holdout split indices
+    if settings.TEST:
+        idc_in, idc_out = train_test_split(np.arange(settings.N_TEST_INSTANCES), test_size=0.2)
+    else:
+        idc_in, idc_out = experiment["meta_holdin_indices"], experiment["meta_holdout_indices"]
+
+    x, word_index, max_sequence_length = make_sequences(instances)
+
+    x_in = x[idc_in]
+    x_out = x[idc_out]
+    y_in = y[idc_in]
+    y_out = y[idc_out]
+    instances_in = np.array(instances)[idc_in]
+    instances_out = np.array(instances)[idc_out]
+    labels_in = labels_orig[idc_in]
+    labels_out = labels_orig[idc_out]
+
+    logging.info("Train class category counts: \n{}\n---------\n"
+                 "Test class category counts: \n{}.".format(datahandler.get_label_info(labels_in),
+                                                            datahandler.get_label_info(labels_out)))
+
+    emb_input_dim = len(word_index) + 1
+    output_units = len(label_encoder.classes_)
+
+    # write the featurized data
+    feature_data = {
+        "x_in": x_in.tolist(),
+        "x_out": x_out.tolist(),
+        "y_in": y_in.tolist(),
+        "y_out": y_out.tolist(),
+        "instances_in": instances_in.tolist(),
+        "instances_out": instances_out.tolist(),
+        "labels_in": labels_in.tolist(),
+        "labels_out": labels_out.tolist(),
+        "max_sequence_length": max_sequence_length,
+        "emb_input_dim": emb_input_dim,
+        "output_units": output_units,
+        "word_index": word_index,
+        "all_stats": all_stats,
+        "classes": label_encoder.classes_.tolist(),
+    }
+
+    util.write_features(feature_data)
+
+    return feature_data
 
 
 if __name__ == "__main__":
