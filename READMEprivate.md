@@ -39,4 +39,40 @@ Set your experiment storage/output paths and experimental settings in settings.p
 - `clean_output_dir.py`: removes empty dirs made as output when testing.
 
 ## Results
-best score: 0.75F1 pretty good :D
+see NAACL18 paper submission
+
+DEPRECATED: Theano install:
+- `./sentifmdetect17` We will install all modules and non-system dependencies through conda in this folder.
+- Conda: install miniconda (latest 3.6.3) from site.
+    - `cd ~ && wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh`
+    - `sh Miniconda3-latest-Linux-x86_64.sh`
+    - Do not forget to add to .zshrc:
+        ```bash
+        # added by Miniconda3 installer
+        export PATH="/home/gilles/miniconda3/bin:$PATH"
+        export PATH="/home/gilles/repos/sentifmdetect17/yes/bin:$PATH"
+        ```
+- create virtualenv `conda create -n sentifm17 python=3.6`
+- active `source activate sentifm17`
+- `conda install numpy scipy mkl mkl-service nose libgpuarray nltk gensim pandas`
+- `pip install pycuda parameterized fuzzywuzzy python-levenshtein sklearn-deap; pip install git+https://github.com/lebedov/scikit-cuda.git#egg=scikit-cuda git+https://github.com/maciejkula/glove-python.git` 
+    scikit-cuda is optional but version 0.5.2. (currently dev) is required for Theano.
+- `conda install theano pygpu keras`
+- make a file at `~/.theanorc` containing:
+    ```
+    [global]
+    device = cuda
+    floatX = float32
+    
+    [cuda] 
+    root = /usr/local/cuda-9.1/bin
+    
+    [nvcc]
+    fastmath = True
+    ```
+- `export PYTHONPATH=: && EXPORT MKL_THREADING_LAYER=GNU`
+- test Theano with `python -c "import theano; theano.test()"`
+- TROUBLESHOOT: Make sure you are using the python binary of the virtualenv `python -c "import sys; print(sys.executable)"`
+- TROUBLESHOOT: If CUDNN cannot by found by Theano: The easiest is to include them in your CUDA installation. Copy the `*.h` files to `CUDA_ROOT/include` and the `*.so*` files to `CUDA_ROOT/lib64` (by default, CUDA_ROOT is `/usr/local/cuda` on Linux). `sudo ln -s /usr/lib/x86_64-linux-gnu/libcudnn* /usr/local/cuda/lib64`
+- TROUBLESHOOT: run `theano-cache purge` on changing environment vars or theano flags, or when theano has a segmentation fault.
+

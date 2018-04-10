@@ -51,7 +51,7 @@ FEATURE_OPT_FP = f"/home/gilles/repos/sentifmdetect17/features/{DATASET}_feature
 # OUTPUT
 TIMESTAMP = datetime.now(timezone("Europe/Brussels")).strftime("%Y-%m-%d_%H:%M:%S_%Z")
 OPT_DIRP = f"/home/gilles/repos/sentifmdetect17/output/{DATASET}_{TIMESTAMP}"
-os.makedirs(OPT_DIRP, exist_ok=True)
+os.makedirs(OPT_DIRP, exist_ok=True) # TODO remove this: everytime import it will make a dir
 SCORER_FOLD_LOG_DIRP = os.path.join(OPT_DIRP, 'fold_log')
 SCORER_FOLD_MODEL_DIRP = None
 # SCORER_FOLD_MODEL_DIRP = os.path.join(OPT_DIRP, 'fold_models')

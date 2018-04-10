@@ -1,0 +1,152 @@
+\begin{thebibliography}{}
+\expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
+
+\bibitem[{Abadi et~al.(2015)Abadi, Agarwal, Barham, Brevdo, Chen, Citro,
+  Corrado, Davis, Dean, Devin, Ghemawat, Goodfellow, Harp, Irving, Isard, Jia,
+  Jozefowicz, Kaiser, Kudlur, Levenberg, Man\'{e}, Monga, Moore, Murray, Olah,
+  Schuster, Shlens, Steiner, Sutskever, Talwar, Tucker, Vanhoucke, Vasudevan,
+  Vi\'{e}gas, Vinyals, Warden, Wattenberg, Wicke, Yu, and
+  Zheng}]{tensorflow2015whitepaper}
+Mart\'{\i}n Abadi, Ashish Agarwal, Paul Barham, Eugene Brevdo, Zhifeng Chen,
+  Craig Citro, Greg~S. Corrado, Andy Davis, Jeffrey Dean, Matthieu Devin,
+  Sanjay Ghemawat, Ian Goodfellow, Andrew Harp, Geoffrey Irving, Michael Isard,
+  Yangqing Jia, Rafal Jozefowicz, Lukasz Kaiser, Manjunath Kudlur, Josh
+  Levenberg, Dan Man\'{e}, Rajat Monga, Sherry Moore, Derek Murray, Chris Olah,
+  Mike Schuster, Jonathon Shlens, Benoit Steiner, Ilya Sutskever, Kunal Talwar,
+  Paul Tucker, Vincent Vanhoucke, Vijay Vasudevan, Fernanda Vi\'{e}gas, Oriol
+  Vinyals, Pete Warden, Martin Wattenberg, Martin Wicke, Yuan Yu, and Xiaoqiang
+  Zheng. 2015.
+\newblock \href{https://www.tensorflow.org/}{{TensorFlow}: Large-scale machine
+  learning on heterogeneous systems}.
+\newblock Software available from tensorflow.org.
+\newblock \url{https://www.tensorflow.org/}.
+
+\bibitem[{Ahn(2006)}]{ahn2006stages}
+David Ahn. 2006.
+\newblock The stages of event extraction.
+\newblock In {\em Proceedings of the Workshop on Annotating and Reasoning about
+  Time and Events\/}. Association for Computational Linguistics, pages 1--8.
+
+\bibitem[{Arendarenko and Kakkonen(2012)}]{Arendarenko2012}
+Ernest Arendarenko and Tuomo Kakkonen. 2012.
+\newblock {Ontology-Based Information and Event Extraction for Business
+  Intelligence}.
+\newblock In {\em {Artificial Intelligence: Methodology, Systems, and
+  Applications}\/}. {Springer}, volume 7557 of {\em {Lecture Notes in Computer
+  Science}\/}, pages 89--102.
+
+\bibitem[{Ben~Ami and Feldman(2017)}]{ben2017event}
+Zvi Ben~Ami and Ronen Feldman. 2017.
+\newblock Event-based trading: Building superior trading strategies with
+  state-of-the-art information extraction tools .
+
+\bibitem[{Boudoukh et~al.(2016)Boudoukh, Feldman, Kogan, and
+  Richardson}]{boudoukh2016information}
+Jacob Boudoukh, Ronen Feldman, Shimon Kogan, and Matthew~P Richardson. 2016.
+\newblock Information, trading, and volatility: Evidence from firm-specific
+  news .
+
+\bibitem[{Chang and Lin(2011)}]{Chang2011}
+Chih-Chung Chang and Chih-Jen Lin. 2011.
+\newblock {LIBSVM: A Library for Support Vector Machines}.
+\newblock {\em ACM Transactions on Intelligent Systems and Technology (TIST)\/}
+  2:27:1--27:27.
+
+\bibitem[{Chollet et~al.(2015)}]{chollet2015keras}
+Fran\c{c}ois Chollet et~al. 2015.
+\newblock Keras.
+\newblock \url{https://github.com/fchollet/keras}.
+
+\bibitem[{Ding et~al.(2015)Ding, Zhang, Liu, and
+  Duan}]{Ding:2015:DLE:2832415.2832572}
+Xiao Ding, Yue Zhang, Ting Liu, and Junwen Duan. 2015.
+\newblock \href{http://dl.acm.org/citation.cfm?id=2832415.2832572}{Deep
+  learning for event-driven stock prediction}.
+\newblock In {\em Proceedings of the 24th International Conference on
+  Artificial Intelligence\/}. AAAI Press, IJCAI'15, pages 2327--2333.
+\newblock \url{http://dl.acm.org/citation.cfm?id=2832415.2832572}.
+
+\bibitem[{Du et~al.(2016)Du, Pivovarova, and Yangarber}]{du2016puls}
+Mian Du, Lidia Pivovarova, and Roman Yangarber. 2016.
+\newblock Puls: natural language processing for business intelligence.
+\newblock In {\em Proceedings of the 2016 Workshop on Human Language
+  Technology\/}. Go to Print Publisher, pages 1--8.
+
+\bibitem[{Engle and Ng(1993)}]{Engle1993}
+Robert~F. Engle and Victor~K. Ng. 1993.
+\newblock {Measuring and Testing the Impact of News on Volatility}.
+\newblock {\em The Journal of Finance\/} 48(5):1749--1778.
+
+\bibitem[{Feldman et~al.(2011)Feldman, Rosenfeld, Bar-Haim, and
+  Fresko}]{feldman2011stock}
+Ronen Feldman, Benjamin Rosenfeld, Roy Bar-Haim, and Moshe Fresko. 2011.
+\newblock The stock sonar—sentiment analysis of stocks based on a hybrid
+  approach.
+\newblock In {\em Twenty-Third IAAI Conference\/}.
+
+\bibitem[{Hogenboom et~al.(2013)Hogenboom, Hogenboom, Frasincar, Schouten, and
+  van~der Meer}]{Hogenboom2013}
+Alexander Hogenboom, Frederik Hogenboom, Flavius Frasincar, Kim Schouten, and
+  Otto van~der Meer. 2013.
+\newblock {Semantics-Based Information Extraction for Detecting Economic
+  Events}.
+\newblock {\em Multimedia Tools and Applications\/} 64(1):27--52.
+
+\bibitem[{MacKinlay(1997)}]{MacKinlay1997}
+A.~Craig MacKinlay. 1997.
+\newblock {Event Studies in Economics and Finance}.
+\newblock {\em Journal of Economic Literature\/} 35(1):13--39.
+
+\bibitem[{Mian and Sankaraguruswamy(2012)}]{Mian2012}
+Ghulam~Mujtaba Mian and Srinivasan Sankaraguruswamy. 2012.
+\newblock {Investor Sentiment and Stock Market Response to Earnings News}.
+\newblock {\em The Accounting Review\/} 87(4):1357--1384.
+
+\bibitem[{Mitamura et~al.(2016)Mitamura, Liu, and Hovy}]{mitamura2016overview}
+Teruko Mitamura, Zhengzhong Liu, and Eduard Hovy. 2016.
+\newblock Overview of tac-kbp 2016 event nugget track.
+\newblock In {\em Text Analysis Conference\/}.
+
+\bibitem[{Pennington et~al.(2014)Pennington, Socher, and
+  Manning}]{pennington2014glove}
+Jeffrey Pennington, Richard Socher, and Christopher~D. Manning. 2014.
+\newblock \href{http://www.aclweb.org/anthology/D14-1162}{Glove: Global vectors
+  for word representation}.
+\newblock In {\em Empirical Methods in Natural Language Processing (EMNLP)\/}.
+  pages 1532--1543.
+\newblock \url{http://www.aclweb.org/anthology/D14-1162}.
+
+\bibitem[{Stenetorp et~al.(2012)Stenetorp, Pyysalo, Topi\'{c}, Ohta, Ananiadou,
+  and Tsujii}]{Stenetorp2012}
+Pontus Stenetorp, Sampo Pyysalo, Goran Topi\'{c}, Tomoko Ohta, Sophia
+  Ananiadou, and Jun'ichi Tsujii. 2012.
+\newblock {brat: a Web-based Tool for NLP-Assisted Text Annotation}.
+\newblock In {\em Proceedings of the 13th Conference of the European Chapter of
+  the Association for Computational Linguistics (EACL'12)\/}. {Avignon,
+  France}, pages 102--107.
+
+\bibitem[{Tetlock(2007)}]{Tetlock2007}
+Paul~C. Tetlock. 2007.
+\newblock {Giving Content to Investor Sentiment: The Role of Media in the Stock
+  Market}.
+\newblock {\em The Journal of Finance\/} 62(3):1139--1168.
+
+\bibitem[{Van~de Kauter et~al.(2013)Van~de Kauter, Coorman, Lefever, Desmet,
+  Macken, and Hoste}]{VandeKauter2013}
+Marjan Van~de Kauter, Geert Coorman, Els Lefever, Bart Desmet, Lieve Macken,
+  and V\'{e}ronique Hoste. 2013.
+\newblock {LeTs Preprocess: The multilingual LT3 linguistic preprocessing
+  toolkit}.
+\newblock {\em Computational Linguistics in the Netherlands Journal\/}
+  3:103--120.
+
+\bibitem[{Xie et~al.(2013)Xie, Passonneau, Wu, and Creamer}]{xie2013semantic}
+Boyi Xie, Rebecca~J. Passonneau, Leon Wu, and Germ{\'a}n~G. Creamer. 2013.
+\newblock \href{http://www.aclweb.org/anthology/P13-1086}{Semantic frames to
+  predict stock price movement}.
+\newblock In {\em Proceedings of the 51st Annual Meeting of the Association for
+  Computational Linguistics (Volume 1: Long Papers)\/}. Association for
+  Computational Linguistics, pages 873--883.
+\newblock \url{http://www.aclweb.org/anthology/P13-1086}.
+
+\end{thebibliography}

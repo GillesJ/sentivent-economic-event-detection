@@ -11,7 +11,42 @@ from collections import OrderedDict
 import os
 np.set_printoptions(precision=2)
 
-def print_els_results():
+def average_best_onevsrest():
+    """
+    Averages the best results of onevsrest.
+    [0.95, 0.91, 0.93], #  BuyRating L-SVM
+    [0.62, 0.73, 0.67], #  Debt L-SVM
+    [0.50, 1.00, 0.67], #  Dividend L-SVM
+    [0.58, 0.44, 0.50], #  MergerAcquisition LSTM
+    [0.80, 0.76, 0.78], #  Profit RBF-SVM
+    [0.83, 0.56, 0.67], #  QuarterlyResults L-SVM
+    [0.88, 0.75, 0.81], #  SalesVolume L-SVM
+    [1.00, 0.50, 0.67], #  ShareRepurchase L-SVM
+    [1.00, 1.00, 1.00], #  TargetPrice LSTM
+    [0.91, 0.77, 0.83], #  Turnover L-SVM
+    :return:
+    """
+
+    best_onevsrest = np.array(
+        [
+            [0.95, 0.91, 0.93], #  BuyRating L-SVM
+            [0.62, 0.73, 0.67], #  Debt L-SVM
+            [0.50, 1.00, 0.67], #  Dividend L-SVM
+            [0.58, 0.44, 0.50], #  MergerAcquisition LSTM
+            [0.80, 0.76, 0.78], #  Profit RBF-SVM
+            [0.83, 0.56, 0.67], #  QuarterlyResults L-SVM
+            [0.88, 0.75, 0.81], #  SalesVolume L-SVM
+            [1.00, 0.50, 0.67], #  ShareRepurchase L-SVM
+            [1.00, 1.00, 1.00], #  TargetPrice LSTM
+            [0.91, 0.77, 0.83], #  Turnover L-SVM
+        ]
+    )
+
+    avg = np.mean(best_onevsrest, axis=0)
+
+    print(f"One vs rest average best P R F1: {avg}")
+
+def print_avg_results():
     '''
     NOTE These LSTM results have rounding error, the correct average results are in the paper!
     '''
@@ -144,6 +179,9 @@ def get_best_all(data):
     return best
 
 if __name__ == "__main__":
+
+    average_best_onevsrest()
+
     expmetadata = {
         "buyrating_partial": "/home/gilles/repos/sentifmdetect17/output/en_maintype_2018-03-26_17:51:11_CEST/metadata.json",
         "rest": "/home/gilles/repos/sentifmdetect17/output/en_maintype_2018-03-29_18:25:07_CEST/metadata.json",
