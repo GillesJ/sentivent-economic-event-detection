@@ -183,13 +183,13 @@ if __name__ == "__main__":
     average_best_onevsrest()
 
     expmetadata = {
-        "buyrating_partial": "/home/gilles/repos/sentifmdetect17/output/en_maintype_2018-03-26_17:51:11_CEST/metadata.json",
-        "rest": "/home/gilles/repos/sentifmdetect17/output/en_maintype_2018-03-29_18:25:07_CEST/metadata.json",
-        "fullplus": "/home/gilles/repos/sentifmdetect17/output/en_maintype_2018-03-31_00:54:36_CEST/metadata.json",
-        "4failed": "/home/gilles/repos/sentifmdetect17/output/en_maintype_2018-04-02_13:50:21_CEST/metadata.json",
-        "5retry": "/home/gilles/repos/sentifmdetect17/output/en_maintype_2018-04-02_23:00:22_CEST/metadata.json",
+        "buyrating_partial": ".//output/en_maintype_2018-03-26_17:51:11_CEST/metadata.json",
+        "rest": ".//output/en_maintype_2018-03-29_18:25:07_CEST/metadata.json",
+        "fullplus": ".//output/en_maintype_2018-03-31_00:54:36_CEST/metadata.json",
+        "4failed": ".//output/en_maintype_2018-04-02_13:50:21_CEST/metadata.json",
+        "5retry": ".//output/en_maintype_2018-04-02_23:00:22_CEST/metadata.json",
     }
-    optdir = "/home/gilles/repos/sentifmdetect17/results"
+    optdir = ".//results"
     best_fp = os.path.join(optdir, "best_bin.json")
 
     if os.path.isfile(best_fp):

@@ -1,4 +1,4 @@
-# SENTiVENT: SentiFM economic event detection '17
+# SENTiVENT: Company-specific event detection in economic news
 Economic event type detection on the SentiFM dataset using neural and other ML methods.
 
 This repo includes data and code for company-specific sentence level event detection for the [English SentiFM dataset](https://osf.io/enu2k/).
@@ -22,7 +22,7 @@ It runs complete experiments with word-vector creation & evaluation, hyperparame
     }
     ```
     TADAH, we now have a properly optimised deep learning stack!
-    The Python executable path with the deps can be found at `/home/gilles/repos/sentifmdetect17/yes/bin/python`.
+    The Python executable path with the deps can be found at `.//yes/bin/python`.
 
 ## Contents and usage
 Set your experiment storage/output paths and experimental settings in settings.py
@@ -39,4 +39,4 @@ Set your experiment storage/output paths and experimental settings in settings.p
 - `clean_output_dir.py`: removes empty dirs made as output when testing.
 
 ## Results
-best score: 0.75F1 pretty good :D
+best score: 0.75F1.

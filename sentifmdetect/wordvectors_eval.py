@@ -64,9 +64,9 @@ if __name__ == "__main__":
 
     scores = {}
 
-    # glove_fps = glob("/home/gilles/repos/sentifmdetect17/sentifmdetect/output/en_maintype_2017-12-18_16-18-44_WORDVECTORS/*.glovemodel") # EN_MAINTYPE TRAINED
+    # glove_fps = glob(".//sentifmdetect/output/en_maintype_2017-12-18_16-18-44_WORDVECTORS/*.glovemodel") # EN_MAINTYPE TRAINED
 
-    glove_fps = glob("/home/gilles/corpora/word_embeddings/glove_stanford/*/*d.txt") # STANFORD TRAINEDs
+    glove_fps = glob("./stanfordpretraineddir/*/*d.txt") # STANFORD TRAINEDs
 
     for i, glove_fp in enumerate(glove_fps):
 

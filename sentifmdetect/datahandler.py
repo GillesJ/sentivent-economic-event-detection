@@ -280,18 +280,18 @@ def parse_fold_logs_to_dataframe(dirp):
 if __name__ == "__main__":
 
     dirp = [
-        "/home/gilles/repos/sentifmdetect17/sentifmdetect/output/en_maintype_2017-12-27_18-25-41",
-        "/home/gilles/repos/sentifmdetect17/sentifmdetect/output/en_maintype_2017-12-26_22-40-00",
-        "/home/gilles/repos/sentifmdetect17/sentifmdetect/output/en_maintype_2017-12-17_18-01-16",
-        "/home/gilles/repos/sentifmdetect17/sentifmdetect/output/en_maintype_2017-12-18_22-50-14",
-        "/home/gilles/repos/sentifmdetect17/sentifmdetect/output/en_maintype_2017-12-16_17-41-54",
-        "/home/gilles/repos/sentifmdetect17/sentifmdetect/output/en_maintype_2017-11-29_20-49-27",
-        "/home/gilles/repos/sentifmdetect17/sentifmdetect/output/en_maintype_2017-12-20_17-04-23",
-        "/home/gilles/repos/sentifmdetect17/sentifmdetect/output/en_maintype_2017-12-22_16-59-07", # no pretrained
-        "/home/gilles/repos/sentifmdetect17/sentifmdetect/output/en_maintype_2017-11-30_09-58-15",
-        "/home/gilles/repos/sentifmdetect17/sentifmdetect/output/en_maintype_2017-12-15_17-28-53",
+        ".//sentifmdetect/output/en_maintype_2017-12-27_18-25-41",
+        ".//sentifmdetect/output/en_maintype_2017-12-26_22-40-00",
+        ".//sentifmdetect/output/en_maintype_2017-12-17_18-01-16",
+        ".//sentifmdetect/output/en_maintype_2017-12-18_22-50-14",
+        ".//sentifmdetect/output/en_maintype_2017-12-16_17-41-54",
+        ".//sentifmdetect/output/en_maintype_2017-11-29_20-49-27",
+        ".//sentifmdetect/output/en_maintype_2017-12-20_17-04-23",
+        ".//sentifmdetect/output/en_maintype_2017-12-22_16-59-07", # no pretrained
+        ".//sentifmdetect/output/en_maintype_2017-11-30_09-58-15",
+        ".//sentifmdetect/output/en_maintype_2017-12-15_17-28-53",
             ]
-    # dirp = glob("/home/gilles/repos/sentifmdetect17/sentifmdetect/output/*")
+    # dirp = glob(".//sentifmdetect/output/*")
     for drp in dirp:
         if "_WORDVECTORS" not in drp:
             print(drp)

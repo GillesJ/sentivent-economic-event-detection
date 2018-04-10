@@ -35,22 +35,22 @@ np.random.seed(RANDOM_SEED)
 LANGUAGE = "en"
 TASK = "maintype"
 DATASET = f"{LANGUAGE}_{TASK}" if not TEST else f"TEST{N_TEST_INSTANCES}_{LANGUAGE}_{TASK}"
-EXPERIMENT_DATA = "/home/gilles/repos/sentifmdetect17/sentifmdetect/static/experiment_data.json" # made for sharing
+EXPERIMENT_DATA = ".//sentifmdetect/static/experiment_data.json" # made for sharing
 ALL_DATA_DIR = {
-    "en_maintype": "/home/gilles/corpora/sentifm/data/English/MainType",
-    "nl_maintype": "/home/gilles/corpora/sentifm/data/Dutch/MainType",
+    "en_maintype": "sentifmdatadirEnglish/MainType",
+    "nl_maintype": "sentifmdatadirDutch/MainType",
 }
 ALL_EXCLUDE = { # data path to skip for inclusion because it redundant and badly parsed
     "en_maintype": [],
-    "nl_maintype": ["/home/gilles/corpora/sentifm/data/Dutch/MainType/BuyRating_nl_train_uniq.txt"],
+    "nl_maintype": ["sentifmdatadirDutch/MainType/BuyRating_nl_train_uniq.txt"],
 }
 EXCLUDE = ALL_EXCLUDE[f"{LANGUAGE}_{TASK}"]
 DATA_DIR = ALL_DATA_DIR[f"{LANGUAGE}_{TASK}"]
-FEATURE_OPT_FP = f"/home/gilles/repos/sentifmdetect17/features/{DATASET}_features.json"
+FEATURE_OPT_FP = f".//features/{DATASET}_features.json"
 
 # OUTPUT
 TIMESTAMP = datetime.now(timezone("Europe/Brussels")).strftime("%Y-%m-%d_%H:%M:%S_%Z")
-OPT_DIRP = f"/home/gilles/repos/sentifmdetect17/output/{DATASET}_{TIMESTAMP}"
+OPT_DIRP = f".//output/{DATASET}_{TIMESTAMP}"
 os.makedirs(OPT_DIRP, exist_ok=True) # TODO remove this: everytime import it will make a dir
 SCORER_FOLD_LOG_DIRP = os.path.join(OPT_DIRP, 'fold_log')
 SCORER_FOLD_MODEL_DIRP = None
@@ -86,36 +86,36 @@ EARLY_STOP = EarlyStopping(
 # EMB_NAME = "glove.6B.300d".format(EMB_DIM)
 
 EMB_FP = {
-    "glove.6B.50d": "/home/gilles/corpora/word_embeddings/glove_stanford/glove.6B/glove.6B.50d.txt",
-    "glove.6B.100d": "/home/gilles/corpora/word_embeddings/glove_stanford/glove.6B/glove.6B.100d.txt",
-    "glove.6B.200d": "/home/gilles/corpora/word_embeddings/glove_stanford/glove.6B/glove.6B.200d.txt",
-    "glove.6B.300d": "/home/gilles/corpora/word_embeddings/glove_stanford/glove.6B/glove.6B.300d.txt",
-    "glove.42B.300d": "/home/gilles/corpora/word_embeddings/glove_stanford/glove.42B.300d/glove.42B.300d.txt",
-    "glove.840B.300d": "/home/gilles/corpora/word_embeddings/glove_stanford/glove.840B.300d/glove.840B.300d.txt",
-    "glove.twitter.27B.25d": "/home/gilles/corpora/word_embeddings/glove_stanford/glove.twitter.27B/glove.twitter.27B.25d.txt",
-    "glove.twitter.27B.50d": "/home/gilles/corpora/word_embeddings/glove_stanford/glove.twitter.27B/glove.twitter.27B.50d.txt",
-    "glove.twitter.27B.100d": "/home/gilles/corpora/word_embeddings/glove_stanford/glove.twitter.27B/glove.twitter.27B.100d.txt",
-    "glove.twitter.27B.200d": "/home/gilles/corpora/word_embeddings/glove_stanford/glove.twitter.27B/glove.twitter.27B.200d.txt",
+    "glove.6B.50d": "./stanfordpretraineddir/glove.6B/glove.6B.50d.txt",
+    "glove.6B.100d": "./stanfordpretraineddir/glove.6B/glove.6B.100d.txt",
+    "glove.6B.200d": "./stanfordpretraineddir/glove.6B/glove.6B.200d.txt",
+    "glove.6B.300d": "./stanfordpretraineddir/glove.6B/glove.6B.300d.txt",
+    "glove.42B.300d": "./stanfordpretraineddir/glove.42B.300d/glove.42B.300d.txt",
+    "glove.840B.300d": "./stanfordpretraineddir/glove.840B.300d/glove.840B.300d.txt",
+    "glove.twitter.27B.25d": "./stanfordpretraineddir/glove.twitter.27B/glove.twitter.27B.25d.txt",
+    "glove.twitter.27B.50d": "./stanfordpretraineddir/glove.twitter.27B/glove.twitter.27B.50d.txt",
+    "glove.twitter.27B.100d": "./stanfordpretraineddir/glove.twitter.27B/glove.twitter.27B.100d.txt",
+    "glove.twitter.27B.200d": "./stanfordpretraineddir/glove.twitter.27B/glove.twitter.27B.200d.txt",
 	"glove.en_maintype_w15_lr0.25_ep20.50d.glovemodel": # own trained model top 10 best on google word2vec analogy eval (cf. /static)
-		"/home/gilles/repos/sentifmdetect17/output/en_maintype_2018-03-22_18:41:52_CET_WORDVECTORS/glove.en_maintype_w15_lr0.25_ep20.50d.glovemodel",
+		".//output/en_maintype_2018-03-22_18:41:52_CET_WORDVECTORS/glove.en_maintype_w15_lr0.25_ep20.50d.glovemodel",
 	"glove.en_maintype_w15_lr0.25_ep30.100d.glovemodel":
-		"/home/gilles/repos/sentifmdetect17/output/en_maintype_2018-03-22_18:41:52_CET_WORDVECTORS/glove.en_maintype_w15_lr0.25_ep30.100d.glovemodel",
+		".//output/en_maintype_2018-03-22_18:41:52_CET_WORDVECTORS/glove.en_maintype_w15_lr0.25_ep30.100d.glovemodel",
 	"glove.en_maintype_w10_lr0.25_ep20.100d.glovemodel":
-		"/home/gilles/repos/sentifmdetect17/output/en_maintype_2018-03-22_18:41:52_CET_WORDVECTORS/glove.en_maintype_w10_lr0.25_ep20.100d.glovemodel",
+		".//output/en_maintype_2018-03-22_18:41:52_CET_WORDVECTORS/glove.en_maintype_w10_lr0.25_ep20.100d.glovemodel",
 	"glove.en_maintype_w15_lr0.25_ep50.50d.glovemodel":
-		"/home/gilles/repos/sentifmdetect17/output/en_maintype_2018-03-22_18:41:52_CET_WORDVECTORS/glove.en_maintype_w15_lr0.25_ep50.50d.glovemodel",
+		".//output/en_maintype_2018-03-22_18:41:52_CET_WORDVECTORS/glove.en_maintype_w15_lr0.25_ep50.50d.glovemodel",
 	"glove.en_maintype_w15_lr0.25_ep20.25d.glovemodel":
-		"/home/gilles/repos/sentifmdetect17/output/en_maintype_2018-03-22_18:41:52_CET_WORDVECTORS/glove.en_maintype_w15_lr0.25_ep20.25d.glovemodel",
+		".//output/en_maintype_2018-03-22_18:41:52_CET_WORDVECTORS/glove.en_maintype_w15_lr0.25_ep20.25d.glovemodel",
 	"glove.en_maintype_w10_lr0.25_ep20.50d.glovemodel":
-		"/home/gilles/repos/sentifmdetect17/output/en_maintype_2018-03-22_18:41:52_CET_WORDVECTORS/glove.en_maintype_w10_lr0.25_ep20.50d.glovemodel",
+		".//output/en_maintype_2018-03-22_18:41:52_CET_WORDVECTORS/glove.en_maintype_w10_lr0.25_ep20.50d.glovemodel",
 	"glove.en_maintype_w15_lr0.25_ep20.200d.glovemodel":
-		"/home/gilles/repos/sentifmdetect17/output/en_maintype_2018-03-22_18:41:52_CET_WORDVECTORS/glove.en_maintype_w15_lr0.25_ep20.200d.glovemodel",
+		".//output/en_maintype_2018-03-22_18:41:52_CET_WORDVECTORS/glove.en_maintype_w15_lr0.25_ep20.200d.glovemodel",
 	"glove.en_maintype_w15_lr0.25_ep30.25d.glovemodel": # seem to do well
-		"/home/gilles/repos/sentifmdetect17/output/en_maintype_2018-03-22_18:41:52_CET_WORDVECTORS/glove.en_maintype_w15_lr0.25_ep30.25d.glovemodel",
+		".//output/en_maintype_2018-03-22_18:41:52_CET_WORDVECTORS/glove.en_maintype_w15_lr0.25_ep30.25d.glovemodel",
 	"glove.en_maintype_w10_lr0.25_ep30.100d.glovemodel":
-		"/home/gilles/repos/sentifmdetect17/output/en_maintype_2018-03-22_18:41:52_CET_WORDVECTORS/glove.en_maintype_w10_lr0.25_ep30.100d.glovemodel",
+		".//output/en_maintype_2018-03-22_18:41:52_CET_WORDVECTORS/glove.en_maintype_w10_lr0.25_ep30.100d.glovemodel",
 	"glove.en_maintype_w10_lr0.25_ep30.25d.glovemodel":
-		"/home/gilles/repos/sentifmdetect17/output/en_maintype_2018-03-22_18:41:52_CET_WORDVECTORS/glove.en_maintype_w10_lr0.25_ep30.25d.glovemodel",
+		".//output/en_maintype_2018-03-22_18:41:52_CET_WORDVECTORS/glove.en_maintype_w10_lr0.25_ep30.25d.glovemodel",
 }
 # for settings the tokenization function
 TOKENIZERS = {

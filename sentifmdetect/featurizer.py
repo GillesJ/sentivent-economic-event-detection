@@ -11,7 +11,7 @@ from sentifmdetect import util
 import json
 from sklearn.preprocessing import MultiLabelBinarizer
 import os
-os.environ['CORENLP_HOME'] = "/home/gilles/software/stanford-corenlp-full-2018-02-27/"
+os.environ['CORENLP_HOME'] = "~/software/stanford-corenlp-full-2018-02-27/"
 import string
 from sklearn.model_selection import train_test_split
 import logging
