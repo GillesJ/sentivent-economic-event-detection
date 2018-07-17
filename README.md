@@ -1,9 +1,11 @@
-# SENTiVENT: Company-specific event detection in economic news
-Economic event type detection on the SentiFM dataset using neural and other ML methods.
+# Economic event detection in company-specific news text
+Economic event type detection on the SentiFM dataset using biLSTM and SVM for the paper: Gilles Jacobs, Els Lefever, and Véronique Hoste. 2018. Economic event detection in company-specific news text. In Proceedings of the 1st Workshop on Economics and NLP (ECONLP). ACL 2018, Melbourne, AUS, 1-10.
 
-This repo includes data and code for company-specific sentence level event detection for the [English SentiFM dataset](https://osf.io/enu2k/).
+This repo includes data and code for company-specific sentence level event type classification for the [English SentiFM dataset](https://osf.io/enu2k/).
 
-It runs complete experiments with word-vector creation & evaluation, hyperparameter optimization in crossvalidation and tests on holdout.
+Please cite the original paper when using the dataset.
+
+This code can completely replicate the experiments described in the paper with preprocessing, word-vector creation & evaluation, hyperparameter optimization in crossvalidation and holdout-prediction.
 
 ## Set-up:
 1. Install non-python dependencies:
