@@ -5,7 +5,7 @@ This repo includes data and code for company-specific sentence level event type 
 
 Please cite the original paper when using the dataset.
 
-This code can completely replicate the experiments described in the paper with preprocessing, word-vector creation & evaluation, hyperparameter optimization in crossvalidation and holdout-prediction.
+This code can completely replicate the experiments described in the paper with pre-processing, word-vector creation & evaluation, hyperparameter optimization in crossvalidation and holdout-prediction.
 
 ## Set-up:
 1. Install non-python dependencies:
