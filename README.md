@@ -23,9 +23,6 @@ This code can completely replicate the experiments described in the paper with p
         "backend": "tensorflow"
     }
     ```
-    TADAH, we now have a properly optimised deep learning stack!
-    The Python executable path with the deps can be found at `.//yes/bin/python`.
-
 ## Contents and usage
 Set your experiment storage/output paths and experimental settings in settings.py
 - `settings.py` for defining the experimental constants for crossvalidation optim. & testing, & wordvector training.
